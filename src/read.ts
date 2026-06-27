@@ -2,6 +2,19 @@ import type { Env } from "./types";
 import { cacheControlFor, contentTypeFor, notFound } from "./http";
 import { r2Key, type ResolvedRepo } from "./config";
 import { basename, type Resource } from "./coordinates";
+import { getArtifact } from "./db";
+
+/** Release artifacts stay hidden until a signature has verified them (see signatures.ts). */
+export async function isReleaseArtifactHidden(
+  env: Env,
+  resolved: ResolvedRepo,
+  resource: Resource,
+  key: string,
+): Promise<boolean> {
+  if (resolved.repo !== "release" || resource.kind !== "artifact") return false;
+  const row = await getArtifact(env.DB, key);
+  return row === null || row.verified === 0;
+}
 
 function hasBody(obj: R2Object | R2ObjectBody): obj is R2ObjectBody {
   return "body" in obj;
@@ -26,6 +39,8 @@ export async function handleRead(
   resource: Resource,
 ): Promise<Response> {
   const key = r2Key(resolved);
+  if (await isReleaseArtifactHidden(env, resolved, resource, key)) return notFound();
+
   const filename = basename(resolved.relPath);
   const cacheControl = cacheControlFor(resolved.repo, resource);
 

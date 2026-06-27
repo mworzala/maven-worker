@@ -16,7 +16,8 @@ function put(path: string, body: string, auth: string | null = AUTH): Promise<Re
 
 beforeEach(async () => {
   await resetStorage();
-  const id = await createAccount("minestom");
+  // A configured PGP key lets release artifacts be deployed (they land hidden until signed).
+  const id = await createAccount("minestom", { publicPgpKey: "dummy-key" });
   await addKey(id, KEY);
   await addNamespace(id, "net.minestom");
 });
@@ -48,11 +49,11 @@ describe("deploy: authentication", () => {
 });
 
 describe("deploy: authorization", () => {
-  it("accepts a deploy to an owned namespace", async () => {
+  it("accepts a deploy to an owned namespace but hides it until signed", async () => {
     const res = await put(`releases/${REL}`, "JARBYTES");
     expect(res.status).toBe(201);
-    const get = await SELF.fetch(`${BASE}/releases/${REL}`);
-    expect(await get.text()).toBe("JARBYTES");
+    // Pending (unsigned) release artifacts are not downloadable.
+    expect((await SELF.fetch(`${BASE}/releases/${REL}`)).status).toBe(404);
   });
 
   it("accepts a deploy to a sub-namespace", async () => {
@@ -62,6 +63,14 @@ describe("deploy: authorization", () => {
 
   it("rejects a deploy to an unowned namespace with 403", async () => {
     const res = await put("releases/com/evil/lib/1.0/lib-1.0.jar", "x");
+    expect(res.status).toBe(403);
+  });
+
+  it("rejects a release deploy when the account has no PGP key", async () => {
+    const id = await createAccount("nokey");
+    await addKey(id, "nk");
+    await addNamespace(id, "com.nokey");
+    const res = await put("releases/com/nokey/a/1.0/a-1.0.jar", "x", basicAuth("nokey", "nk"));
     expect(res.status).toBe(403);
   });
 });
@@ -87,8 +96,8 @@ describe("deploy: immutability", () => {
   it("rejects re-deploying an existing release artifact with 409", async () => {
     expect((await put(`releases/${REL}`, "v1")).status).toBe(201);
     expect((await put(`releases/${REL}`, "v2")).status).toBe(409);
-    const get = await SELF.fetch(`${BASE}/releases/${REL}`);
-    expect(await get.text()).toBe("v1");
+    const stored = await env.BUCKET.get(`releases/${REL}`);
+    expect(await stored!.text()).toBe("v1");
   });
 
   it("allows re-deploying snapshot builds (mutable)", async () => {
@@ -113,7 +122,7 @@ describe("deploy: generated resources are discarded", () => {
 
 describe("deploy: key rotation", () => {
   it("supports multiple live keys and immediate revocation", async () => {
-    const id = await createAccount("rot");
+    const id = await createAccount("rot", { publicPgpKey: "dummy-key" });
     await addNamespace(id, "com.rot");
     await addKey(id, "old");
     await addKey(id, "new");

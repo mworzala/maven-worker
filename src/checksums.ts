@@ -4,6 +4,7 @@ import { r2Key, type ResolvedRepo } from "./config";
 import type { ChecksumAlgo, Resource } from "./coordinates";
 import { cacheControlFor, generatedResponse, notFound } from "./http";
 import { generateMetadataXml } from "./metadata";
+import { isReleaseArtifactHidden } from "./read";
 
 /** Hex digest of a byte stream, computed incrementally (no buffering). */
 export async function hashStream(
@@ -39,8 +40,9 @@ export async function handleChecksum(
     digest = xml === null ? null : hashString(xml, algo);
   } else {
     // Checksum of a stored object (artifact or signature): strip the `.<algo>` suffix.
-    const targetRel = resolved.relPath.slice(0, -(algo.length + 1));
-    const obj = await env.BUCKET.get(r2Key(resolved, targetRel));
+    const targetKey = r2Key(resolved, resolved.relPath.slice(0, -(algo.length + 1)));
+    if (await isReleaseArtifactHidden(env, resolved, target, targetKey)) return notFound();
+    const obj = await env.BUCKET.get(targetKey);
     digest = obj === null ? null : await hashStream(obj.body, algo);
   }
 
