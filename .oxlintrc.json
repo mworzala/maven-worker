@@ -8,6 +8,7 @@
   },
   "ignorePatterns": ["node_modules", "coverage", ".wrangler", "dist"],
   "rules": {
-    "no-console": "off"
+    "no-console": "off",
+    "no-await-in-loop": "off"
   }
 }

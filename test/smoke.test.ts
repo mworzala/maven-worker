@@ -27,8 +27,8 @@ describe("runtime smoke", () => {
     expect(row?.n).toBe(1);
   });
 
-  it("worker responds", async () => {
+  it("worker responds (root is an unmapped path → 404)", async () => {
     const res = await SELF.fetch("https://repo.example.com/");
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(404);
   });
 });
