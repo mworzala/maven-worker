@@ -15,7 +15,8 @@
     "lint:fix": "oxlint --fix",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
-    "check": "oxfmt --check && oxlint && tsc --noEmit && vitest run",
+    "check": "oxfmt --check && oxlint --deny-warnings && tsc --noEmit && vitest run",
+    "admin": "node scripts/admin.mjs",
     "cf-typegen": "wrangler types"
   },
   "dependencies": {
