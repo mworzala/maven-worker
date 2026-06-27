@@ -35,6 +35,12 @@ function escapeRegExp(value: string): string {
   return value.replaceAll(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+/** Last path segment. */
+export function basename(path: string): string {
+  const i = path.lastIndexOf("/");
+  return i < 0 ? path : path.slice(i + 1);
+}
+
 function splitExtension(name: string): { stem: string; ext: string } | null {
   const dot = name.lastIndexOf(".");
   if (dot <= 0 || dot === name.length - 1) return null;
@@ -157,4 +163,33 @@ export function checksumTarget(resource: Resource): Resource {
 export function isMetadataResource(resource: Resource): boolean {
   const target = checksumTarget(resource);
   return target.kind === "group-metadata" || target.kind === "snapshot-metadata";
+}
+
+/** The groupId a resource (or its checksum target) belongs to. */
+export function resourceGroupId(resource: Resource): string {
+  switch (resource.kind) {
+    case "artifact":
+    case "signature":
+      return resource.coord.groupId;
+    case "group-metadata":
+    case "snapshot-metadata":
+      return resource.groupId;
+    case "checksum":
+      return resourceGroupId(resource.target);
+  }
+}
+
+/** The directory version a resource targets, or null for group-level metadata. */
+export function resourceVersion(resource: Resource): string | null {
+  switch (resource.kind) {
+    case "artifact":
+    case "signature":
+      return resource.coord.version;
+    case "snapshot-metadata":
+      return resource.version;
+    case "group-metadata":
+      return null;
+    case "checksum":
+      return resourceVersion(resource.target);
+  }
 }

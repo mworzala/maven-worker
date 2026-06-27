@@ -3,6 +3,7 @@ import { loadRepositories, resolveRepo } from "./config";
 import { classifyPath } from "./coordinates";
 import { handleRead } from "./read";
 import { handleBrowse } from "./browse";
+import { handlePut } from "./deploy";
 import { methodNotAllowed, notFound, textResponse } from "./http";
 
 async function handleFetch(request: Request, env: Env): Promise<Response> {
@@ -21,7 +22,7 @@ async function handleFetch(request: Request, env: Env): Promise<Response> {
       return handleRead(request, env, resolved, resource);
     }
     case "PUT":
-      return textResponse(501, "Not Implemented");
+      return handlePut(request, env, resolved);
     default:
       return methodNotAllowed("GET, HEAD, PUT");
   }

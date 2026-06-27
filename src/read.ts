@@ -1,12 +1,7 @@
 import type { Env } from "./types";
 import { cacheControlFor, contentTypeFor, notFound } from "./http";
 import { r2Key, type ResolvedRepo } from "./config";
-import type { Resource } from "./coordinates";
-
-function basename(path: string): string {
-  const i = path.lastIndexOf("/");
-  return i < 0 ? path : path.slice(i + 1);
-}
+import { basename, type Resource } from "./coordinates";
 
 function hasBody(obj: R2Object | R2ObjectBody): obj is R2ObjectBody {
   return "body" in obj;

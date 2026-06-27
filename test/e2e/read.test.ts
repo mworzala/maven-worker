@@ -1,5 +1,8 @@
 import { SELF, env } from "cloudflare:test";
 import { beforeEach, describe, expect, it } from "vitest";
+import { resetStorage } from "../helpers";
+
+beforeEach(resetStorage);
 
 const BASE = "https://repo.example.com";
 const JAR_KEY = "releases/net/minestom/minestom/1.5.0/minestom-1.5.0.jar";
