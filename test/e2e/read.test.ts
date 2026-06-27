@@ -70,18 +70,14 @@ describe("read path (GET/HEAD)", () => {
     expect(await res.text()).toBe(JAR_BODY.slice(0, 4));
   });
 
-  it("uses the right content types", async () => {
+  it("uses the right content types for stored objects", async () => {
     await seed("releases/g/a/1.0/a-1.0.pom", "<project/>");
-    await seed("releases/g/a/1.0/a-1.0.jar.sha1", "abc123");
-    await seed("releases/g/a/maven-metadata.xml", "<metadata/>");
+    await seed("releases/g/a/1.0/a-1.0.jar.asc", "SIGNATURE");
 
     const pom = await SELF.fetch(`${BASE}/releases/g/a/1.0/a-1.0.pom`);
     expect(pom.headers.get("Content-Type")).toBe("application/xml");
-    const sha = await SELF.fetch(`${BASE}/releases/g/a/1.0/a-1.0.jar.sha1`);
-    expect(sha.headers.get("Content-Type")).toBe("text/plain;charset=utf-8");
-    const meta = await SELF.fetch(`${BASE}/releases/g/a/maven-metadata.xml`);
-    expect(meta.headers.get("Content-Type")).toBe("application/xml");
-    expect(meta.headers.get("Cache-Control")).toBe("public, max-age=60, must-revalidate");
+    const asc = await SELF.fetch(`${BASE}/releases/g/a/1.0/a-1.0.jar.asc`);
+    expect(asc.headers.get("Content-Type")).toBe("application/pgp-signature");
   });
 
   it("marks snapshot artifacts as short-lived", async () => {

@@ -77,6 +77,49 @@ export async function recordArtifact(db: D1Database, row: ArtifactRow): Promise<
     .run();
 }
 
+export interface VersionRow {
+  version: string;
+  updated: number;
+}
+
+/** Distinct verified versions of an artifact in a repo, oldest deploy first. */
+export async function listVersions(
+  db: D1Database,
+  repo: RepoKind,
+  groupId: string,
+  artifactId: string,
+): Promise<VersionRow[]> {
+  const { results } = await db
+    .prepare(
+      `SELECT version, MAX(deployed_at) AS updated FROM artifacts
+       WHERE repo = ?1 AND group_id = ?2 AND artifact_id = ?3 AND verified = 1
+       GROUP BY version ORDER BY updated ASC`,
+    )
+    .bind(repo, groupId, artifactId)
+    .all<VersionRow>();
+  return results;
+}
+
+/** All verified files of a single snapshot version. */
+export async function listSnapshotArtifacts(
+  db: D1Database,
+  repo: RepoKind,
+  groupId: string,
+  artifactId: string,
+  version: string,
+): Promise<ArtifactRow[]> {
+  const { results } = await db
+    .prepare(
+      `SELECT key, account_id AS accountId, repo, group_id AS groupId, artifact_id AS artifactId,
+              version, filename, extension, classifier, verified, deployed_at AS deployedAt
+       FROM artifacts
+       WHERE repo = ?1 AND group_id = ?2 AND artifact_id = ?3 AND version = ?4 AND verified = 1`,
+    )
+    .bind(repo, groupId, artifactId, version)
+    .all<ArtifactRow>();
+  return results;
+}
+
 export async function getArtifact(db: D1Database, key: string): Promise<ArtifactRow | null> {
   const row = await db
     .prepare(

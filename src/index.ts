@@ -4,6 +4,8 @@ import { classifyPath } from "./coordinates";
 import { handleRead } from "./read";
 import { handleBrowse } from "./browse";
 import { handlePut } from "./deploy";
+import { handleMetadata } from "./metadata";
+import { handleChecksum } from "./checksums";
 import { methodNotAllowed, notFound, textResponse } from "./http";
 
 async function handleFetch(request: Request, env: Env): Promise<Response> {
@@ -19,7 +21,15 @@ async function handleFetch(request: Request, env: Env): Promise<Response> {
       }
       const resource = classifyPath(resolved.relPath);
       if (resource === null) return handleBrowse(request, env, resolved);
-      return handleRead(request, env, resolved, resource);
+      switch (resource.kind) {
+        case "group-metadata":
+        case "snapshot-metadata":
+          return handleMetadata(request, env, resolved, resource);
+        case "checksum":
+          return handleChecksum(request, env, resolved, resource);
+        default:
+          return handleRead(request, env, resolved, resource);
+      }
     }
     case "PUT":
       return handlePut(request, env, resolved);

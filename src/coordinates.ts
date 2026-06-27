@@ -31,6 +31,11 @@ export type Resource =
   | { kind: "snapshot-metadata"; groupId: string; artifactId: string; version: string }
   | { kind: "checksum"; algo: ChecksumAlgo; target: Resource };
 
+export type MetadataResource = Extract<
+  Resource,
+  { kind: "group-metadata" } | { kind: "snapshot-metadata" }
+>;
+
 function escapeRegExp(value: string): string {
   return value.replaceAll(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
