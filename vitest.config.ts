@@ -20,6 +20,7 @@ export default defineConfig(async (): Promise<ViteUserConfig> => {
         include: ["src/**/*.ts"],
         exclude: ["src/types.ts"],
         reporter: ["text", "text-summary"],
+        thresholds: { statements: 90, lines: 90, functions: 90, branches: 80 },
       },
     },
   };
