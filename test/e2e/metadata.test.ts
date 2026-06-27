@@ -171,4 +171,37 @@ describe("snapshot metadata generation", () => {
     expect(xml).toContain("<latest>1.6.0-SNAPSHOT</latest>");
     expect(xml).not.toContain("<release>");
   });
+
+  it("handles non-unique snapshot filenames by deriving the timestamp from deploy time", async () => {
+    await seedArtifact({
+      ...base,
+      key: `${dir}/minestom-1.6.0-SNAPSHOT.jar`,
+      filename: "minestom-1.6.0-SNAPSHOT.jar",
+      deployedAt: Date.UTC(2026, 0, 1, 12, 0, 0),
+    });
+    const xml = await text(await SELF.fetch(`${BASE}/${dir}/maven-metadata.xml`));
+    expect(xml).toContain("<value>1.6.0-SNAPSHOT</value>");
+    expect(xml).toContain("<buildNumber>0</buildNumber>");
+    expect(xml).toContain("<timestamp>20260101.120000</timestamp>");
+  });
+});
+
+describe("metadata HEAD requests", () => {
+  it("returns headers without a body", async () => {
+    await seedArtifact({
+      key: "releases/net/minestom/minestom/1.0.0/minestom-1.0.0.jar",
+      repo: "release",
+      groupId: "net.minestom",
+      artifactId: "minestom",
+      version: "1.0.0",
+      filename: "minestom-1.0.0.jar",
+    });
+    const res = await SELF.fetch(`${BASE}/releases/net/minestom/minestom/maven-metadata.xml`, {
+      method: "HEAD",
+    });
+    expect(res.status).toBe(200);
+    expect(res.headers.get("ETag")).toBeTruthy();
+    expect(Number(res.headers.get("Content-Length"))).toBeGreaterThan(0);
+    expect(await res.text()).toBe("");
+  });
 });
