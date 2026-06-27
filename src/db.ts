@@ -120,6 +120,18 @@ export async function listSnapshotArtifacts(
   return results;
 }
 
+/** Every snapshot artifact row (used by GC). */
+export async function listAllSnapshotArtifacts(db: D1Database): Promise<ArtifactRow[]> {
+  const { results } = await db
+    .prepare(
+      `SELECT key, account_id AS accountId, repo, group_id AS groupId, artifact_id AS artifactId,
+              version, filename, extension, classifier, verified, deployed_at AS deployedAt
+       FROM artifacts WHERE repo = 'snapshot'`,
+    )
+    .all<ArtifactRow>();
+  return results;
+}
+
 export async function getArtifact(db: D1Database, key: string): Promise<ArtifactRow | null> {
   const row = await db
     .prepare(

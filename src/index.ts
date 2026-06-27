@@ -6,6 +6,7 @@ import { handleBrowse } from "./browse";
 import { handlePut } from "./deploy";
 import { handleMetadata } from "./metadata";
 import { handleChecksum } from "./checksums";
+import { runSnapshotGc } from "./gc";
 import { methodNotAllowed, notFound, textResponse } from "./http";
 
 async function handleFetch(request: Request, env: Env): Promise<Response> {
@@ -46,5 +47,9 @@ export default {
       console.error("unhandled error", err);
       return textResponse(500, "Internal Server Error");
     }
+  },
+
+  scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext): void {
+    ctx.waitUntil(runSnapshotGc(env, Date.now()));
   },
 } satisfies ExportedHandler<Env>;
