@@ -29,10 +29,29 @@ jobs:
       - name: Test with coverage
         run: npm run test:coverage
 
-  deploy:
-    name: Deploy to Cloudflare
+  deploy-gate:
+    name: Check deploy config
     needs: verify
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    outputs:
+      configured: ${{ steps.check.outputs.configured }}
+    steps:
+      - id: check
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -n "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::CLOUDFLARE_API_TOKEN is not set — skipping deploy (expected on the template repo and unconfigured forks)."
+          fi
+
+  deploy:
+    name: Deploy to Cloudflare
+    needs: [verify, deploy-gate]
+    if: needs.deploy-gate.outputs.configured == 'true'
     runs-on: ubuntu-latest
     concurrency:
       group: deploy-production
