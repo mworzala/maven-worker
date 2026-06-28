@@ -11,7 +11,7 @@ import {
   signDetached,
 } from "../helpers";
 
-const BASE = "https://maven.minestom.net";
+const BASE = "https://repo.example.com";
 const AUTH = basicAuth("minestom", "ci-key");
 const hex = (algo: "md5" | "sha1", body: string): string =>
   createHash(algo).update(body).digest("hex");

@@ -6,7 +6,7 @@ export type RepoKind = "release" | "snapshot";
  * repository. Deployment paths are pure configuration — nothing here is hard-coded.
  *
  * - `host`: hostname to match, or `"*"` for any host.
- * - `prefix`: public path prefix to mount at, e.g. `/releases`, `/maven2`, or `/`.
+ * - `prefix`: public path prefix to mount at, e.g. `/releases`, `/snapshots`, or `/`.
  * - `repo`: policy applied (immutable+signed releases vs mutable snapshots).
  * - `r2Prefix`: internal R2 key prefix the artifacts are stored under.
  */

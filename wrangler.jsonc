@@ -1,6 +1,8 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "maven-worker",
+  // Cloudflare account id. `npm run setup` fills this in.
+  "account_id": "REPLACE_WITH_ACCOUNT_ID",
   "main": "src/index.ts",
   "compatibility_date": "2025-06-01",
   "compatibility_flags": ["nodejs_compat"],
@@ -23,10 +25,10 @@
   "triggers": { "crons": ["0 3 * * *"] },
   // Deployment paths are pure configuration. `host: "*"` matches any hostname.
   // Match precedence: exact host before "*", then longest path prefix.
-  // Example custom mapping (e.g. minestom): set REPOSITORIES to
-  //   [{ host: "minestom.net", prefix: "/maven2", repo: "release", r2Prefix: "releases" },
-  //    { host: "snapshots.minestom.net", prefix: "/", repo: "snapshot", r2Prefix: "snapshots" }]
-  // and add matching `routes` for those hostnames.
+  // Example custom domain: set REPOSITORIES to
+  //   [{ host: "repo.example.com", prefix: "/releases", repo: "release", r2Prefix: "releases" },
+  //    { host: "repo.example.com", prefix: "/snapshots", repo: "snapshot", r2Prefix: "snapshots" }]
+  // and add a matching `route` for that hostname.
   "vars": {
     "REPOSITORIES": [
       { "host": "*", "prefix": "/releases", "repo": "release", "r2Prefix": "releases" },

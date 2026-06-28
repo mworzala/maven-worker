@@ -1,0 +1,4 @@
+# Keep local deployment config on manual template merges (`git merge upstream/main`).
+# `npm run update` already excludes these paths; this protects ad-hoc merges too.
+# Requires `git config merge.ours.driver true` locally, which `npm run setup`/`update` set.
+wrangler.jsonc merge=ours

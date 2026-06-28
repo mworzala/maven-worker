@@ -16,7 +16,10 @@
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
     "check": "oxfmt --check && oxlint --deny-warnings && tsc --noEmit && vitest run",
-    "admin": "node scripts/admin.mjs",
+    "cli": "node scripts/cli.mjs",
+    "setup": "node scripts/cli.mjs setup",
+    "update": "node scripts/cli.mjs update",
+    "admin": "node scripts/cli.mjs",
     "cf-typegen": "wrangler types"
   },
   "dependencies": {
