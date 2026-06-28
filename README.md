@@ -2,8 +2,8 @@
 
 [![CI](../../actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
 
-A self-hostable Maven repository running on **Cloudflare Workers**, with artifacts in **R2** and 
-accounts/index in **D1**. Public read, authenticated write, namespace ownership, signature-enforced 
+A self-hostable Maven repository running on **Cloudflare Workers**, with artifacts in **R2** and
+accounts/index in **D1**. Public read, authenticated write, namespace ownership, signature-enforced
 releases, immutable releases, and snapshot repositories with 90 day garbage-collection.
 
 > **This is a GitHub template.** Click **Use this template**, run `npm run setup` (a guided wizard
@@ -84,7 +84,7 @@ Make sure **Actions** are enabled on the new repo (**Settings → Actions → Ge
 
 | Setting                       | What to set                                                                     |
 | ----------------------------- | ------------------------------------------------------------------------------- |
-| `account_id`                  | Your Cloudflare account id. `npm run setup` fills this in.       |
+| `account_id`                  | Your Cloudflare account id. `npm run setup` fills this in.                      |
 | `d1_databases[0].database_id` | The D1 database id. `npm run setup` fills this in.                              |
 | `r2_buckets[0].bucket_name`   | The R2 bucket (`maven-artifacts`).                                              |
 | `name`                        | The Worker name (also your `*.workers.dev` subdomain path). Rename if you like. |
